@@ -1,0 +1,1358 @@
+/* =========================================================
+   IMPOSTOR — style.css
+   Tmavý, moderní design inspirovaný Discordem / Spotify.
+   Vše je postavené na CSS proměnných pro snadnou úpravu.
+   ========================================================= */
+
+:root {
+  /* --- Barvy pozadí --- */
+  --color-bg: #0e0f13;
+  --color-bg-alt: #16181d;
+  --color-surface: #1c1f26;
+  --color-surface-hover: #23262f;
+  --color-surface-2: #272a34;
+  --color-border: #2f323d;
+  --color-border-light: #3a3e4a;
+
+  /* --- Akcentní barvy --- */
+  --color-accent: #5865f2;      /* discord-like fialová/modrá */
+  --color-accent-hover: #6f76ff;
+  --color-accent-soft: rgba(88, 101, 242, 0.15);
+  --color-success: #1db954;     /* spotify zelená */
+  --color-success-hover: #22d65f;
+  --color-danger: #ed4245;
+  --color-danger-hover: #f5555a;
+  --color-warning: #faa61a;
+
+  /* --- Text --- */
+  --color-text: #f2f3f5;
+  --color-text-muted: #9aa0ac;
+  --color-text-faint: #6b7280;
+
+  /* --- Typografie --- */
+  --font-main: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* --- Rozměry / radius --- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* --- Stíny --- */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow-accent: 0 0 32px rgba(88, 101, 242, 0.35);
+  --shadow-glow-success: 0 0 32px rgba(29, 185, 84, 0.35);
+  --shadow-glow-danger: 0 0 32px rgba(237, 66, 69, 0.4);
+
+  /* --- Přechody --- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 0.15s var(--ease-out);
+  --transition-normal: 0.3s var(--ease-out);
+  --transition-slow: 0.6s var(--ease-out);
+}
+
+/* =========================================================
+   RESET & ZÁKLADY
+   ========================================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-light);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-faint); }
+
+/* =========================================================
+   APP LAYOUT & POZADÍ
+   ========================================================= */
+#app {
+  position: relative;
+  min-height: 100vh;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  isolation: isolate;
+}
+
+.bg-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.25;
+  z-index: -1;
+  pointer-events: none;
+}
+.bg-glow--1 {
+  width: 480px;
+  height: 480px;
+  background: var(--color-accent);
+  top: -160px;
+  left: -120px;
+}
+.bg-glow--2 {
+  width: 420px;
+  height: 420px;
+  background: var(--color-success);
+  bottom: -140px;
+  right: -100px;
+}
+
+/* =========================================================
+   OBRAZOVKY (screens) — přepínání s fade/slide animací
+   ========================================================= */
+.screen {
+  display: none;
+  flex-direction: column;
+  animation: none;
+}
+.screen.active {
+  display: flex;
+  animation: screenFadeIn var(--transition-slow) both;
+}
+.screen.leaving {
+  animation: screenFadeOut var(--transition-normal) both;
+}
+
+@keyframes screenFadeIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes screenFadeOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.99); }
+}
+
+/* =========================================================
+   HLAVIČKA
+   ========================================================= */
+.app-header {
+  text-align: center;
+  margin-bottom: 28px;
+  animation: fadeIn var(--transition-slow) both;
+}
+.app-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.app-logo__icon {
+  font-size: 2.4rem;
+  filter: drop-shadow(0 4px 12px rgba(88, 101, 242, 0.5));
+}
+.app-logo__text {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 0%, #b9bdff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.app-tagline {
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  font-size: 0.95rem;
+}
+
+/* =========================================================
+   OBECNÉ PRVKY — karty / panely
+   ========================================================= */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+}
+
+.panel {
+  padding: 20px 22px;
+  animation: fadeIn var(--transition-slow) both;
+}
+.panel--wide { grid-column: span 2; }
+
+.panel__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+.panel__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.panel__header-row .panel__title { margin-bottom: 0; }
+.panel__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.panel__hint {
+  color: var(--color-text-faint);
+  font-size: 0.78rem;
+  margin: -6px 0 12px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   TLAČÍTKA
+   ========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.92rem;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+              background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.96); }
+.btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.btn__icon { font-size: 1em; line-height: 1; }
+
+.btn--primary {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn--primary:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-glow-accent);
+}
+
+.btn--secondary {
+  background: var(--color-success);
+  color: #06210f;
+  box-shadow: var(--shadow-sm);
+}
+.btn--secondary:hover {
+  background: var(--color-success-hover);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-glow-success);
+}
+
+.btn--ghost {
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-light);
+}
+.btn--ghost:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+.btn--danger { color: var(--color-danger); }
+.btn--danger:hover { background: rgba(237, 66, 69, 0.12); color: var(--color-danger-hover); }
+
+.btn--small { padding: 7px 14px; font-size: 0.8rem; }
+.btn--large { padding: 15px 30px; font-size: 1.02rem; }
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   STEPPER (počet hráčů / impostorů)
+   ========================================================= */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+}
+.stepper__btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.stepper__btn:hover { background: var(--color-accent); transform: scale(1.08); }
+.stepper__btn:active { transform: scale(0.9); }
+.stepper__value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  min-width: 34px;
+  text-align: center;
+}
+.stepper--small { padding: 6px 12px; gap: 12px; }
+.stepper--small .stepper__btn { width: 30px; height: 30px; font-size: 1.05rem; }
+.stepper--small .stepper__value { font-size: 1.1rem; min-width: 20px; }
+
+/* =========================================================
+   JMÉNA HRÁČŮ
+   ========================================================= */
+.player-name-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.player-name-list.is-reordering {
+  user-select: none;
+}
+.player-name-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px 8px 6px;
+  animation: popIn var(--transition-normal) both;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.player-name-item:focus-within { border-color: var(--color-accent); }
+
+.player-name-item.is-dragging {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-accent);
+  z-index: 500;
+  cursor: grabbing;
+}
+.player-name-item__placeholder {
+  border: 2px dashed var(--color-border-light);
+  border-radius: var(--radius-md);
+}
+
+.player-drag-handle {
+  flex-shrink: 0;
+  width: 26px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--color-text-faint);
+  border-radius: 6px;
+  cursor: grab;
+  touch-action: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.player-drag-handle:hover { background: var(--color-surface-2); color: var(--color-text); }
+.player-drag-handle:active { cursor: grabbing; }
+
+.player-name-item__number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-hover);
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.player-name-item input {
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  font-size: 0.92rem;
+  width: 100%;
+  outline: none;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* =========================================================
+   VÝBĚR TÉMATU
+   ========================================================= */
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.topic-card {
+  position: relative;
+  background: var(--color-bg-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 14px 12px;
+  text-align: left;
+  transition: all var(--transition-fast);
+  animation: popIn var(--transition-normal) both;
+}
+.topic-card:hover {
+  border-color: var(--color-border-light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+.topic-card.is-selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  box-shadow: var(--shadow-glow-accent);
+}
+.topic-card__icon { font-size: 1.4rem; display: block; margin-bottom: 6px; }
+.topic-card__name { font-weight: 700; font-size: 0.9rem; display: block; }
+.topic-card__count { color: var(--color-text-faint); font-size: 0.72rem; margin-top: 2px; display: block; }
+.topic-card__custom-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.62rem;
+  background: var(--color-success);
+  color: #06210f;
+  padding: 2px 6px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+}
+
+/* Breadcrumb nad gridem tématu (zpět na kategorie) */
+.topic-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.topic-breadcrumb.is-hidden { display: none; }
+.topic-breadcrumb__back {
+  background: var(--color-bg-alt);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.topic-breadcrumb__back:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.topic-breadcrumb__current {
+  font-weight: 700;
+  color: var(--color-text-faint);
+  font-size: 0.9rem;
+}
+
+/* Speciální akční karty: Vše / Náhodná / Oblíbené */
+.topic-card--action {
+  border-style: dashed;
+  background: transparent;
+}
+.topic-card--action:hover {
+  border-style: solid;
+}
+.topic-card--favorites {
+  border-color: #caa419;
+  background: rgba(202, 164, 25, 0.08);
+}
+
+/* Karta podkategorie — obsahuje hvězdičku oblíbených + klikatelné tělo */
+.topic-card--sub {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  cursor: default;
+}
+.topic-card__favorite {
+  all: unset;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+  padding: 2px;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+  order: 2;
+}
+.topic-card__favorite:hover { transform: scale(1.15); }
+.topic-card__favorite.is-active { color: #f4c430; }
+.topic-card__main {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  order: 1;
+}
+.topic-card__main .topic-card__name { white-space: normal; line-height: 1.25; }
+
+/* Shrnutí aktuálního výběru pod gridem */
+.topic-selection-summary {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.topic-selection-summary__label { color: var(--color-text-faint); }
+.topic-selection-summary__count {
+  margin-left: auto;
+  color: var(--color-text-faint);
+  font-size: 0.78rem;
+}
+
+/* =========================================================
+   NASTAVENÍ HRY (switch, řádky)
+   ========================================================= */
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.setting-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  flex: 1 1 220px;
+}
+.setting-item__label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  flex: 1;
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch__slider {
+  position: absolute;
+  inset: 0;
+  background: var(--color-border-light);
+  border-radius: var(--radius-pill);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+.switch__slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+.switch input:checked + .switch__slider { background: var(--color-accent); }
+.switch input:checked + .switch__slider::before { transform: translateX(18px); }
+.switch input:focus-visible + .switch__slider { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* =========================================================
+   HERNÍ MÓDY
+   ========================================================= */
+.game-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+
+.game-mode-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--color-bg-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  animation: popIn var(--transition-normal) both;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+.game-mode-card:hover {
+  border-color: var(--color-border-light);
+  box-shadow: var(--shadow-md);
+}
+.game-mode-card.is-active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  box-shadow: var(--shadow-glow-accent);
+}
+.game-mode-card.is-disabled {
+  opacity: 0.45;
+}
+
+.game-mode-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.game-mode-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+.game-mode-card__icon { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
+.game-mode-card__desc {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.game-mode-card__switch { flex-shrink: 0; }
+
+.game-mode-card__options {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.game-mode-card__option-btn {
+  flex: 1;
+  padding: 6px 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid var(--color-border-light);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.game-mode-card__option-btn:hover { background: var(--color-surface-hover); color: var(--color-text); }
+.game-mode-card__option-btn.is-selected {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+/* =========================================================
+   SETUP FOOTER
+   ========================================================= */
+.setup-footer {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.setup-error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  min-height: 1.2em;
+  text-align: center;
+}
+
+/* =========================================================
+   REVEAL SCREEN
+   ========================================================= */
+#screen-reveal {
+  min-height: 70vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 30px;
+}
+
+.reveal-progress {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.reveal-progress__bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.reveal-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-success));
+  border-radius: var(--radius-pill);
+  transition: width var(--transition-slow);
+}
+#reveal-progress-text {
+  font-size: 0.78rem;
+  color: var(--color-text-faint);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.reveal-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  animation: fadeIn var(--transition-slow) both;
+}
+.reveal-waiting__hint {
+  color: var(--color-text-faint);
+  font-size: 0.95rem;
+}
+.reveal-waiting__name {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff, #b9bdff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.reveal-card-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  width: 100%;
+}
+.reveal-card-wrap.is-hidden,
+.reveal-waiting.is-hidden {
+  display: none;
+}
+
+/* Karta s 3D flip animací */
+.role-card {
+  width: 100%;
+  max-width: 400px;
+  min-height: 320px;
+  perspective: 1200px;
+  animation: cardFlipIn 0.55s var(--ease-out) both;
+}
+@keyframes cardFlipIn {
+  from { opacity: 0; transform: rotateY(-90deg) scale(0.9); }
+  to   { opacity: 1; transform: rotateY(0) scale(1); }
+}
+
+.role-card__inner {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+}
+
+.role-card__face {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+  border-radius: var(--radius-lg);
+  padding: 34px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: var(--shadow-lg);
+  border: 1.5px solid var(--color-border-light);
+}
+.role-card__face.is-hidden { display: none; }
+
+.role-card__face--normal {
+  background: linear-gradient(160deg, var(--color-surface) 0%, var(--color-bg-alt) 100%);
+}
+.role-card__face--impostor {
+  background: linear-gradient(160deg, #2b1416 0%, #1c0f10 100%);
+  border-color: rgba(237, 66, 69, 0.4);
+  box-shadow: var(--shadow-lg), var(--shadow-glow-danger);
+}
+
+.role-card__badge {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+}
+.role-card__badge--crew { background: var(--color-accent-soft); color: var(--color-accent-hover); }
+.role-card__badge--impostor {
+  background: rgba(237, 66, 69, 0.18);
+  color: #ff7a7c;
+  animation: pulseBadge 1.6s ease-in-out infinite;
+}
+@keyframes pulseBadge {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(237, 66, 69, 0.35); }
+  50% { box-shadow: 0 0 0 8px rgba(237, 66, 69, 0); }
+}
+
+.role-card__label {
+  color: var(--color-text-faint);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 18px;
+}
+.role-card__topic {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.role-card__divider {
+  width: 60px;
+  height: 2px;
+  background: var(--color-border-light);
+  border-radius: 2px;
+  margin: 10px 0;
+}
+.role-card__word {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  word-break: break-word;
+  animation: wordPop 0.4s var(--ease-out) both 0.15s;
+}
+@keyframes wordPop {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+/* Vtipná ilustrace impostora — podezřelý týpek v přestrojení */
+.impostor-illustration {
+  width: 118px;
+  height: 118px;
+  margin-top: 14px;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+  animation: impostorPop 0.5s var(--ease-out) both 0.1s, impostorWiggle 3.2s ease-in-out infinite 0.6s;
+}
+@keyframes impostorPop {
+  from { opacity: 0; transform: scale(0.6) rotate(-8deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes impostorWiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-3deg); }
+  75%      { transform: rotate(3deg); }
+}
+
+.role-card__impostor-text {
+  margin-top: 14px;
+  color: #ffb3b4;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 280px;
+}
+.role-card__similar-word {
+  color: #ffcf6b;
+  font-size: 1.05rem;
+}
+
+/* Extra info bloky na kartě (spojenci, úkoly, seznam impostorů) — vygenerováno JS podle aktivních módů */
+.role-card__extra {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+}
+.role-card__extra:empty { margin-top: 0; }
+
+.role-card__extra-block {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  text-align: left;
+  animation: fadeIn var(--transition-normal) both;
+}
+.role-card__extra-block__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+  margin-bottom: 4px;
+}
+.role-card__extra-block__value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.role-card__extra-block__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.role-card__extra-block__list li {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.role-card__extra-block--ally { border-color: rgba(29, 185, 84, 0.4); }
+.role-card__extra-block--ally .role-card__extra-block__value { color: var(--color-success-hover); }
+.role-card__extra-block--task { border-color: rgba(250, 166, 26, 0.4); }
+.role-card__extra-block--task .role-card__extra-block__value { color: var(--color-warning); font-weight: 600; font-size: 0.9rem; }
+.role-card__extra-block--impostors { border-color: rgba(237, 66, 69, 0.4); }
+.role-card__extra-block--impostors .role-card__extra-block__list li { color: #ff9a9c; }
+.role-card__extra-block--similar .role-card__extra-block__value { color: #ffcf6b; }
+
+/* =========================================================
+   FINAL SCREEN
+   ========================================================= */
+#screen-final {
+  min-height: 70vh;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.final-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 420px;
+  animation: fadeIn var(--transition-slow) both;
+}
+.final-emoji {
+  font-size: 3.4rem;
+  animation: bounceIn 0.6s var(--ease-out) both;
+}
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.final-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+}
+.final-text {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+.final-starter {
+  margin-top: 6px;
+  padding: 12px 18px;
+  background: var(--color-accent-soft);
+  border: 1px solid rgba(88, 101, 242, 0.35);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  animation: fadeIn var(--transition-slow) both 0.1s;
+}
+.final-starter strong {
+  color: var(--color-accent-hover);
+  font-size: 1.05rem;
+}
+.final-starter__hint {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-text-faint);
+  font-size: 0.8rem;
+}
+
+/* Pravidla aktivních módů na finální obrazovce (Emoji mód, Jedno slovo, Beze slov...) */
+.final-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.final-rules.is-hidden { display: none; }
+.final-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.86rem;
+  color: var(--color-text-muted);
+  text-align: left;
+  animation: fadeIn var(--transition-normal) both;
+}
+.final-rule__icon { font-size: 1.1rem; flex-shrink: 0; }
+
+/* Countdown pro mód „Časový limit" */
+.final-timelimit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  width: 100%;
+}
+.final-timelimit.is-hidden { display: none; }
+.final-timelimit__label {
+  color: var(--color-text-faint);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.final-timelimit__value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-accent-hover);
+  line-height: 1;
+  animation: countdownPulse 1s ease-in-out;
+}
+.final-timelimit__value.is-done {
+  color: var(--color-success-hover);
+}
+@keyframes countdownPulse {
+  0% { transform: scale(1.3); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Obrazovka výměny rolí (mód „Výměna rolí") */
+.roleswap-pair {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 6px 0;
+}
+.roleswap-name {
+  background: var(--color-accent-soft);
+  border: 1px solid rgba(88, 101, 242, 0.4);
+  border-radius: var(--radius-pill);
+  padding: 10px 22px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-accent-hover);
+  animation: popIn var(--transition-normal) both;
+}
+.roleswap-arrow {
+  font-size: 1.4rem;
+  color: var(--color-text-faint);
+  animation: fadeIn var(--transition-normal) both 0.15s;
+}
+
+.final-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.answer-reveal {
+  margin-top: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  width: 100%;
+  animation: fadeIn var(--transition-normal) both;
+}
+.answer-reveal.is-hidden { display: none; }
+.answer-reveal__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.9rem;
+  padding: 4px 0;
+  color: var(--color-text-muted);
+}
+.answer-reveal__row strong { color: var(--color-text); }
+
+/* =========================================================
+   MODAL — SPRÁVA TÉMAT
+   ========================================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 7, 10, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+  animation: fadeIn var(--transition-normal) both;
+}
+.modal-overlay.is-hidden { display: none; }
+
+.modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: modalPopIn var(--transition-normal) both;
+  box-shadow: var(--shadow-lg);
+}
+@keyframes modalPopIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+.modal__header h2 { font-size: 1.15rem; font-weight: 700; }
+.modal__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-surface-2);
+  font-size: 1rem;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.modal__close:hover { background: var(--color-danger); transform: rotate(90deg); }
+
+.modal__body {
+  padding: 20px 22px 26px;
+  overflow-y: auto;
+}
+.theme-manager__section { margin-bottom: 26px; }
+.theme-manager__section h3 {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.custom-topic-list { display: flex; flex-direction: column; gap: 8px; }
+.custom-topic-group { margin-bottom: 14px; }
+.custom-topic-group:last-child { margin-bottom: 0; }
+.custom-topic-group__title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+.custom-topic-group .custom-topic-item + .custom-topic-item { margin-top: 6px; }
+.custom-topic-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  animation: popIn var(--transition-fast) both;
+}
+.custom-topic-item__name { font-weight: 600; flex: 1; }
+.custom-topic-item__count { color: var(--color-text-faint); font-size: 0.78rem; }
+.custom-topic-item__actions { display: flex; gap: 6px; }
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-surface-2);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  font-size: 0.85rem;
+}
+.icon-btn:hover { background: var(--color-accent); transform: scale(1.08); }
+.icon-btn--danger:hover { background: var(--color-danger); }
+
+.empty-hint { color: var(--color-text-faint); font-size: 0.85rem; }
+
+.theme-form { display: flex; flex-direction: column; gap: 8px; }
+.field-label { font-size: 0.8rem; color: var(--color-text-muted); margin-top: 6px; }
+.text-input, .textarea-input {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--transition-fast);
+}
+.text-input:focus, .textarea-input:focus { border-color: var(--color-accent); }
+.text-input:disabled { opacity: 0.6; cursor: not-allowed; }
+select.text-input { cursor: pointer; }
+.theme-form__actions { display: flex; gap: 10px; margin-top: 6px; }
+.theme-form__new-category {
+  display: grid;
+  grid-template-columns: 1fr 90px;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px;
+  background: var(--color-bg-alt);
+  border: 1px dashed var(--color-border-light);
+  border-radius: var(--radius-md);
+}
+.theme-form__new-category.is-hidden { display: none; }
+.theme-form__new-category .field-label { margin-top: 0; }
+.theme-form__icon-input { text-align: center; }
+
+.import-export-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* =========================================================
+   PATIČKA (autor stránky)
+   ========================================================= */
+.site-footer {
+  position: relative;
+  max-width: 900px;
+  margin: 10px auto 0;
+  padding: 10px 20px 4px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+  letter-spacing: 0.01em;
+}
+.site-footer strong {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text);
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
+  font-size: 0.86rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+.toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.is-hidden { display: none !important; }
+
+/* =========================================================
+   RESPONZIVITA
+   ========================================================= */
+@media (max-width: 720px) {
+  .setup-grid { grid-template-columns: 1fr; }
+  .panel--wide { grid-column: span 1; }
+  .app-logo__text { font-size: 1.8rem; }
+}
+
+@media (max-width: 480px) {
+  #app { padding: 18px 14px 50px; }
+  .panel { padding: 16px; }
+  .reveal-waiting__name { font-size: 1.9rem; }
+  .role-card__word { font-size: 1.7rem; }
+  .final-title { font-size: 1.5rem; }
+  .btn--large { padding: 13px 22px; font-size: 0.95rem; }
+  .import-export-row { flex-direction: column; align-items: stretch; }
+  .import-export-row .btn { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <title>Nikomu Nevěř — společenská hra</title>
+  <meta name="description" content="Nikomu Nevěř — party hra pro skupinu kamarádů. Jeden je Impostor, ostatní znají tajné slovo." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ======================================================= -->
+  <!-- APLIKACE — kontejner na všechny obrazovky                -->
+  <!-- ======================================================= -->
+  <div id="app">
+
+    <!-- Plovoucí pozadí -->
+    <div class="bg-glow bg-glow--1" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow--2" aria-hidden="true"></div>
+
+    <!-- Toast oznámení -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <!-- ===================================================== -->
+    <!-- OBRAZOVKA: SETUP (nastavení hry)                        -->
+    <!-- ===================================================== -->
+    <section id="screen-setup" class="screen active" data-screen="setup">
+      <header class="app-header">
+        <div class="app-logo">
+          <span class="app-logo__icon">🎭</span>
+          <h1 class="app-logo__text">Nikomu Nevěř</h1>
+        </div>
+        <p class="app-tagline">Kdo mezi vámi nezná slovo?</p>
+      </header>
+
+      <div class="setup-grid">
+
+        <!-- Počet hráčů -->
+        <div class="card panel">
+          <h2 class="panel__title">Počet hráčů</h2>
+          <div class="stepper">
+            <button type="button" class="stepper__btn" id="btn-players-minus" aria-label="Ubrat hráče">−</button>
+            <span class="stepper__value" id="player-count-value">4</span>
+            <button type="button" class="stepper__btn" id="btn-players-plus" aria-label="Přidat hráče">+</button>
+          </div>
+        </div>
+
+        <!-- Jména hráčů -->
+        <div class="card panel panel--wide">
+          <div class="panel__header-row">
+            <h2 class="panel__title">Jména hráčů</h2>
+            <button type="button" class="btn btn--ghost btn--small" id="btn-shuffle-players">
+              <span class="btn__icon">🔀</span> Zamíchat hráče
+            </button>
+          </div>
+          <p class="panel__hint">Podrž ⠿ a přetažením seřaď hráče podle toho, jak sedí — nemusíš pak nic přepisovat.</p>
+          <div id="player-name-list" class="player-name-list"><!-- generováno JS --></div>
+        </div>
+
+        <!-- Výběr tématu -->
+        <div class="card panel panel--wide">
+          <div class="panel__header-row">
+            <h2 class="panel__title">Téma</h2>
+            <div class="panel__actions">
+              <button type="button" class="btn btn--ghost btn--small" id="btn-copy-topic">
+                <span class="btn__icon">📋</span> Kopírovat téma
+              </button>
+              <button type="button" class="btn btn--ghost btn--small" id="btn-open-theme-manager">
+                <span class="btn__icon">⚙️</span> Spravovat témata
+              </button>
+            </div>
+          </div>
+          <p class="panel__hint">Vyber hlavní kategorii a pak konkrétní podkategorii — nebo si vezmi rovnou všechny podkategorie dohromady, náhodnou, či svoje oblíbené.</p>
+          <div id="topic-breadcrumb" class="topic-breadcrumb is-hidden"><!-- generováno JS --></div>
+          <div id="topic-grid" class="topic-grid"><!-- generováno JS --></div>
+          <div id="topic-selection-summary" class="topic-selection-summary"><!-- generováno JS --></div>
+        </div>
+
+        <!-- Extra nastavení -->
+        <div class="card panel panel--wide">
+          <h2 class="panel__title">Nastavení hry</h2>
+          <div class="settings-row">
+
+            <div class="setting-item">
+              <span class="setting-item__label">Počet Impostorů</span>
+              <div class="stepper stepper--small">
+                <button type="button" class="stepper__btn" id="btn-impostors-minus" aria-label="Méně impostorů">−</button>
+                <span class="stepper__value" id="impostor-count-value">1</span>
+                <button type="button" class="stepper__btn" id="btn-impostors-plus" aria-label="Více impostorů">+</button>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <span class="setting-item__label">Impostor vidí téma</span>
+              <label class="switch">
+                <input type="checkbox" id="toggle-show-topic" checked />
+                <span class="switch__slider"></span>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Herní módy -->
+        <div class="card panel panel--wide">
+          <h2 class="panel__title">Herní módy</h2>
+          <p class="panel__hint">Zapni si libovolnou kombinaci pravidel navíc — základní princip hry zůstává stejný.</p>
+          <div id="game-modes-grid" class="game-modes-grid"><!-- generováno JS --></div>
+        </div>
+
+      </div>
+
+      <div class="setup-footer">
+        <p id="setup-error" class="setup-error" aria-live="polite"></p>
+        <button type="button" class="btn btn--primary btn--large" id="btn-start-game">
+          Začít hru <span class="btn__icon">🚀</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- OBRAZOVKA: REVEAL (odhalování rolí)                     -->
+    <!-- ===================================================== -->
+    <section id="screen-reveal" class="screen" data-screen="reveal">
+
+      <div class="reveal-progress">
+        <span id="reveal-progress-text">Hráč 1 / 4</span>
+        <div class="reveal-progress__bar">
+          <div id="reveal-progress-fill" class="reveal-progress__fill"></div>
+        </div>
+      </div>
+
+      <!-- Stav 1: čekání, telefon se předává -->
+      <div id="reveal-waiting" class="reveal-waiting">
+        <p class="reveal-waiting__hint">Podej telefon hráči</p>
+        <h2 id="reveal-player-name" class="reveal-waiting__name">Hráč 1</h2>
+        <button type="button" class="btn btn--primary btn--large" id="btn-show-role">
+          Zobrazit mou roli <span class="btn__icon">👁️</span>
+        </button>
+      </div>
+
+      <!-- Stav 2: odhalená karta -->
+      <div id="reveal-card-wrap" class="reveal-card-wrap is-hidden">
+        <div id="role-card" class="role-card">
+          <div class="role-card__inner">
+
+            <!-- Běžný hráč -->
+            <div id="role-card-normal" class="role-card__face role-card__face--normal">
+              <span class="role-card__badge role-card__badge--crew">HRÁČ</span>
+              <p class="role-card__label">Téma</p>
+              <h3 id="role-topic-normal" class="role-card__topic">—</h3>
+              <div class="role-card__divider"></div>
+              <p class="role-card__label">Tvoje slovo</p>
+              <h2 id="role-word" class="role-card__word">—</h2>
+
+              <div id="role-extra-normal" class="role-card__extra"><!-- generováno JS: spojenci, úkoly --></div>
+            </div>
+
+            <!-- Impostor -->
+            <div id="role-card-impostor" class="role-card__face role-card__face--impostor is-hidden">
+              <span class="role-card__badge role-card__badge--impostor">IMPOSTOR</span>
+
+              <!-- Vtipná ilustrace impostora — podezřelý týpek v přestrojení -->
+              <svg class="impostor-illustration" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustrace podezřele vyhlížejícího impostora s kloboukem, brýlemi a knírem">
+                <ellipse cx="120" cy="230" rx="72" ry="9" fill="#000" opacity="0.3"/>
+                <path d="M58,238 C52,155 58,112 120,102 C182,112 188,155 182,238 Z" fill="#8a1620" stroke="#2b0a0d" stroke-width="4"/>
+                <path d="M88,122 L120,154 L98,106 Z" fill="#63101a" stroke="#2b0a0d" stroke-width="3" stroke-linejoin="round"/>
+                <path d="M152,122 L120,154 L142,106 Z" fill="#63101a" stroke="#2b0a0d" stroke-width="3" stroke-linejoin="round"/>
+                <circle cx="120" cy="93" r="55" fill="#f0b988" stroke="#2b0a0d" stroke-width="4"/>
+                <ellipse cx="120" cy="50" rx="70" ry="14" fill="#1c1c1f" stroke="#000" stroke-width="3"/>
+                <path d="M76,51 C76,10 164,10 164,51 L151,24 C138,15 102,15 89,24 Z" fill="#28282d" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+                <rect x="78" y="43" width="84" height="11" fill="#ed4245"/>
+                <rect x="80" y="86" width="36" height="19" rx="9" fill="#111"/>
+                <rect x="124" y="86" width="36" height="19" rx="9" fill="#111"/>
+                <rect x="114" y="91" width="12" height="6" fill="#111"/>
+                <circle cx="91" cy="92" r="4" fill="#fff" opacity="0.55"/>
+                <circle cx="135" cy="92" r="4" fill="#fff" opacity="0.55"/>
+                <path d="M119,106 q6,9 -2,13" stroke="#2b0a0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M103,136 q17,9 34,0" stroke="#2b0a0d" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M96,124 C101,116 112,114 120,120 C128,114 139,116 144,124 C147,127 145,131 141,129 C135,125 128,122 120,126 C112,122 105,125 99,129 C95,131 93,127 96,124 Z" fill="#161616" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+                <circle cx="95" cy="126" r="4.5" fill="#161616"/>
+                <circle cx="145" cy="126" r="4.5" fill="#161616"/>
+                <text x="20" y="60" font-size="30" fill="#ed4245" font-weight="800" font-family="Arial, sans-serif" transform="rotate(-18 20 60)">?</text>
+                <text x="198" y="42" font-size="24" fill="#ed4245" font-weight="800" font-family="Arial, sans-serif" transform="rotate(14 198 42)">?</text>
+                <text x="206" y="95" font-size="18" fill="#ed4245" font-weight="800" font-family="Arial, sans-serif" transform="rotate(20 206 95)">?</text>
+              </svg>
+
+              <p class="role-card__label" id="role-topic-impostor-label">Téma</p>
+              <h3 id="role-topic-impostor" class="role-card__topic">—</h3>
+              <p id="role-impostor-text" class="role-card__impostor-text">Jsi IMPOSTOR!<br />Neznáš tajné slovo. Snaž se odhalit, o co jde, a nenech se prozradit.</p>
+
+              <div id="role-extra-impostor" class="role-card__extra"><!-- generováno JS: ostatní impostoři, spojenci, úkoly --></div>
+            </div>
+
+          </div>
+        </div>
+
+        <button type="button" class="btn btn--secondary btn--large" id="btn-hide-role">
+          Schovat a předat dalšímu hráči <span class="btn__icon">➡️</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- OBRAZOVKA: ROLE SWAP (mód „Výměna rolí")                -->
+    <!-- ===================================================== -->
+    <section id="screen-roleswap" class="screen" data-screen="roleswap">
+      <div class="final-content">
+        <span class="final-emoji">🔄</span>
+        <h2 class="final-title">Vyměňte si role!</h2>
+        <p class="final-text">
+          Hráči si mezi sebou prohodí telefony. Role zůstávají stejné, jen ji teď hraje někdo jiný.
+        </p>
+
+        <div class="roleswap-pair">
+          <span id="roleswap-name-a" class="roleswap-name">—</span>
+          <span class="roleswap-arrow">↔</span>
+          <span id="roleswap-name-b" class="roleswap-name">—</span>
+        </div>
+
+        <button type="button" class="btn btn--primary btn--large" id="btn-roleswap-continue">
+          Pokračovat <span class="btn__icon">➡️</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- OBRAZOVKA: FINAL (hra může začít)                       -->
+    <!-- ===================================================== -->
+    <section id="screen-final" class="screen" data-screen="final">
+      <div class="final-content">
+        <span class="final-emoji">🎉</span>
+        <h2 class="final-title">Hra může začít!</h2>
+        <p class="final-text">
+          Popisujte slovo jedním slovem nebo krátkou větou a snažte se odhalit Impostora.
+        </p>
+
+        <p class="final-starter">
+          Jako první mluví: <strong id="final-starter-name">—</strong>
+          <span class="final-starter__hint">(klidně to může padnout i na Impostora 😏)</span>
+        </p>
+
+        <div id="final-rules" class="final-rules is-hidden"><!-- generováno JS: pravidla aktivních módů --></div>
+
+        <div id="final-timelimit" class="final-timelimit is-hidden">
+          <span class="final-timelimit__label">Odpočet</span>
+          <div id="final-timelimit-value" class="final-timelimit__value">5</div>
+          <button type="button" class="btn btn--ghost btn--small" id="btn-restart-countdown">
+            <span class="btn__icon">🔁</span> Spustit odpočet znovu
+          </button>
+        </div>
+
+        <div class="final-actions">
+          <button type="button" class="btn btn--primary btn--large" id="btn-new-game">
+            Nová hra <span class="btn__icon">🔄</span>
+          </button>
+          <button type="button" class="btn btn--ghost" id="btn-reveal-answer">
+            Zobrazit odpověď (po skončení hry)
+          </button>
+        </div>
+
+        <div id="answer-reveal" class="answer-reveal is-hidden">
+          <p class="answer-reveal__row"><span>Téma:</span> <strong id="answer-topic">—</strong></p>
+          <p class="answer-reveal__row"><span>Slovo:</span> <strong id="answer-word">—</strong></p>
+          <p class="answer-reveal__row"><span>Impostor:</span> <strong id="answer-impostors">—</strong></p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Patička s autorem — zobrazena na všech obrazovkách -->
+  <footer class="site-footer">Created by <strong>Jan Opelka</strong></footer>
+
+  <!-- ======================================================= -->
+  <!-- MODAL: SPRÁVA TÉMAT                                      -->
+  <!-- ======================================================= -->
+  <div id="theme-modal" class="modal-overlay is-hidden">
+    <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
+      <div class="modal__header">
+        <h2 id="theme-modal-title">Správa témat</h2>
+        <button type="button" class="modal__close" id="btn-close-theme-manager" aria-label="Zavřít">✕</button>
+      </div>
+
+      <div class="modal__body">
+
+        <div class="theme-manager__section">
+          <h3>Vlastní podkategorie</h3>
+          <div id="custom-topic-list" class="custom-topic-list">
+            <p class="empty-hint" id="custom-topic-empty">Zatím nemáš žádné vlastní podkategorie.</p>
+          </div>
+        </div>
+
+        <div class="theme-manager__section">
+          <h3 id="theme-form-title">Přidat novou podkategorii</h3>
+          <form id="theme-form" class="theme-form">
+            <label class="field-label" for="theme-category-select">Kategorie</label>
+            <select id="theme-category-select" class="text-input"><!-- generováno JS --></select>
+
+            <div id="theme-new-category-fields" class="theme-form__new-category is-hidden">
+              <div>
+                <label class="field-label" for="theme-new-category-name">Název nové kategorie</label>
+                <input type="text" id="theme-new-category-name" class="text-input" placeholder="Např. Auta" maxlength="30" />
+              </div>
+              <div>
+                <label class="field-label" for="theme-new-category-icon">Ikona (emoji, nepovinné)</label>
+                <input type="text" id="theme-new-category-icon" class="text-input theme-form__icon-input" placeholder="🚗" maxlength="4" />
+              </div>
+            </div>
+
+            <label class="field-label" for="theme-subcategory-input">Název podkategorie</label>
+            <input type="text" id="theme-subcategory-input" class="text-input" placeholder="Např. Sporťáky" maxlength="30" required />
+
+            <label class="field-label" for="theme-words-input">Slova (oddělená čárkou nebo novým řádkem, min. 4)</label>
+            <textarea id="theme-words-input" class="textarea-input" rows="5" placeholder="Mario, Zelda, Tetris, Minecraft..." required></textarea>
+
+            <div class="theme-form__actions">
+              <button type="submit" class="btn btn--primary" id="btn-save-theme">Uložit podkategorii</button>
+              <button type="button" class="btn btn--ghost is-hidden" id="btn-cancel-edit-theme">Zrušit úpravu</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="theme-manager__section">
+          <h3>Import / Export</h3>
+          <div class="import-export-row">
+            <button type="button" class="btn btn--ghost" id="btn-export-topics">
+              <span class="btn__icon">⬇️</span> Export témat do JSON
+            </button>
+            <button type="button" class="btn btn--ghost" id="btn-import-topics">
+              <span class="btn__icon">⬆️</span> Import témat z JSON
+            </button>
+            <input type="file" id="import-file-input" accept="application/json" class="is-hidden" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
